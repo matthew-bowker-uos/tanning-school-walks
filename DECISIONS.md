@@ -52,9 +52,11 @@ When a decision is later revised, add a *new* entry that supersedes the old; do 
 **Date:** 2026-04-28
 **Reason:** k=3 IDW is the right sensitivity to bound allocation-choice impact on the headline RII ratio. Huff/gravity models import parameters that cannot be calibrated without admissions data, which we do not have, and would invite reviewer challenge for no analytic gain.
 
-## DEC-012 — Weight LSOA centroids by Census 2021 *child* population, not total
+## DEC-012 — Use ONS-published total-population PWCs for LSOA21 origin geometry; weight exposure counts by Census 2021 *child* population
 **Date:** 2026-04-28
-**Reason:** The proxy should align mechanically with the population whose exposure is being estimated. Total-population weighting would over-weight LSOAs with few children but many adults (e.g. retirement-age areas).
+**Reason:** Two separate concerns that the original draft of this entry conflated. (a) The geographic origin used to seed walking routes is the ONS-published LSOA21 population-weighted centroid — these are total-population weighted, the standard published anchor used in UK food-environment GIS, and reproducible without re-deriving them from OA-level data. (b) The exposure count for each LSOA is then weighted by the LSOA's Census 2021 child population (ages 4–18) when aggregating to school-level outcomes and as the regression offset, so the analysis is anchored to the population at risk. A child-population-weighted LSOA centroid (recomputed from OA21 child-pop and OA21 PWCs) is reserved as a sensitivity check only — DEC-011's k-NN sensitivity captures most of the same uncertainty.
+
+**SUPERSEDES** the earlier draft of this entry which proposed self-computed child-PWCs as the primary geometry; that version conflicted with the plan's stated preference for ONS-published PWCs.
 
 ## DEC-013 — OSF pre-registration **skipped** (user choice); replaced by `HYPOTHESES.md` git-tag before salon collection + medRxiv pre-print at submission
 **Date:** 2026-04-28
