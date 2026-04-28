@@ -58,6 +58,27 @@ LA_NAMES_NE: dict[str, str] = {
     "E08000024": "Sunderland",
 }
 
+# GIAS exposes LA via its own ``LA (name)`` column, which mostly matches the
+# ONS LAD22/LAD23 name verbatim. The two differences are recorded here so
+# string matching is reliable. Used by ``schools.filter_ne`` to map GIAS LA
+# names to the ONS codes carried in :data:`LA_CODES_NE`.
+GIAS_LA_NAME_TO_ONS: dict[str, str] = {
+    "County Durham": "E06000047",
+    "Durham": "E06000047",  # historical GIAS spelling
+    "Darlington": "E06000005",
+    "Gateshead": "E08000037",
+    "Hartlepool": "E06000001",
+    "Middlesbrough": "E06000002",
+    "Newcastle upon Tyne": "E08000021",
+    "North Tyneside": "E08000022",
+    "Northumberland": "E06000057",
+    "Redcar and Cleveland": "E06000003",
+    "Redcar & Cleveland": "E06000003",  # alternate punctuation
+    "South Tyneside": "E08000023",
+    "Stockton-on-Tees": "E06000004",
+    "Sunderland": "E08000024",
+}
+
 # Bounding box (approx) for the NE region in WGS84 (lon_min, lat_min, lon_max, lat_max).
 # Used to clip OSM extracts and to grid the Google Places query plan.
 REGION_BBOX_WGS84: tuple[float, float, float, float] = (-2.69, 54.40, -0.30, 55.85)
@@ -170,6 +191,7 @@ __all__ = [
     "CATCHMENT_CAP_M",
     "CRS_BNG",
     "CRS_WGS84",
+    "GIAS_LA_NAME_TO_ONS",
     "DATA_INTERIM",
     "DATA_MANIFEST",
     "DATA_PROCESSED",
