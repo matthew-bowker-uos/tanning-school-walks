@@ -1,0 +1,12 @@
+# Development tooling. Layered on top of requirements.txt:
+#   pip install -r requirements.txt -r requirements-dev.txt
+
+pytest>=8.3
+pytest-cov>=5.0
+ruff>=0.6
+black>=24.8
+nbstripout>=0.7
+pre-commit>=3.8
+mypy>=1.11
+types-PyYAML
+types-requests

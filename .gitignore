@@ -1,0 +1,60 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Data
+data/raw/
+data/interim/
+data/processed/
+!data/manifest.csv
+!data/.gitkeep
+
+# Audit logs (timestamped run artefacts; only the directory is tracked)
+audit_logs/*
+!audit_logs/.gitkeep
+
+# Outputs are committed selectively (final tables/figures only)
+outputs/**/*.tmp.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.python-version-local
+
+# uv / pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# Testing / linting
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
