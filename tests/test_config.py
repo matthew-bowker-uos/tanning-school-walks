@@ -18,10 +18,11 @@ def test_buffer_distances_are_in_metres_and_ascending() -> None:
     assert len(set(sens)) == len(sens)
 
 
-def test_catchment_caps_match_dec_010() -> None:
+def test_catchment_caps_match_dec_016() -> None:
+    # DEC-016 caps walking distance at 5 km for all phases.
     assert config.CATCHMENT_CAP_M["primary"] == 2000
     assert config.CATCHMENT_CAP_M["secondary"] == 5000
-    assert config.CATCHMENT_CAP_M["special"] == 10000
+    assert config.CATCHMENT_CAP_M["special"] == 5000
 
 
 def test_crs_constants() -> None:

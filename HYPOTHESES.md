@@ -12,6 +12,7 @@ The trade-off versus full OSF pre-registration is acknowledged in DEC-013 and wi
 Changes after the hypothesis-lock tag was set are listed here so the historical record is transparent. **Hypotheses H1/H2/H3 and the primary outcome are not changed by any amendment.** Amendments only refine the pre-specified sensitivity-analysis list, and only ever before salon data collection.
 
 - **A-01 (2026-04-28)**: Added Sensitivity #9 (OA21 origin geometry). Reason: a methodological-granularity check requested before Stage 3 began; described in DEC-015. The amendment was made before any salon data was collected.
+- **A-02 (2026-04-28)**: Walking-distance cap reduced from 2 km / 5 km / 10 km (primary / secondary / special) to a uniform 5 km. Reason: a 10 km walk to a special school is mechanistically a non-walking journey and inflates rural route lengths without adding plausible exposure signal. Documented in DEC-016. Made before Stage 4 catchment assignment.
 
 ---
 
@@ -52,7 +53,7 @@ The sensitivity dimensions listed below are the ones whose results will be repor
 2. Buffer distance: 250 m / 400 m / 800 m / 1600 m.
 3. Catchment proxy: hard nearest-school / k=3 IDW / straight-line radius.
 4. Deprivation index: IMD2025 vs IDACI.
-5. Distance caps: ±25 % around the primary 2 km / 5 km / 10 km cap.
+5. Distance caps: ±25 % around the primary 2 km / 5 km / 5 km cap (4 km / 6 km tests).
 6. Route-buffer width: 50 m vs 100 m.
 7. Restrict to schools with ≥1 salon in any buffer.
 8. Routing engine: pandana vs osmnx (and OS Open Roads + networkx if used) on a 10–15 % random sample.

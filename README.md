@@ -45,6 +45,19 @@ pytest
 4. Run all cells. The notebook installs `requirements.txt`, clones this repo into `/content/repo`, performs `pip install -e /content/repo`, and verifies `import schools_sunbeds` works.
 5. Then run notebooks 01..14 in order. Each notebook re-imports `schools_sunbeds` and asserts the data manifest is intact before doing any analytic work.
 
+## Manual verification of salons
+
+After Stage 3, every Google Places + OSM record lands in `audit_logs/manual_verification.csv` with status `pending`. Open the file and edit four columns per row:
+
+- `status` — one of `pending` (default), `confirmed`, `rejected`, `unsure`, `duplicate`, `closed`
+- `reviewer` — your initials
+- `review_date_utc` — ISO date
+- `notes` — optional free text
+
+Stage 6 (exposure measurement) calls `verification.apply_verification` which keeps only `confirmed` + `unsure` rows by default and writes a per-run audit JSON to `audit_logs/verification_apply_*.json`. The verification CSV is committed to git so progress is durable; running notebook 05a is idempotent (existing edits preserved, new places appended as `pending`).
+
+See `notebooks/05a_manual_verification.ipynb` for the bootstrap / preview / summary helper.
+
 ## Reproducibility & audit
 
 - **Hypothesis lock.** `HYPOTHESES.md` is committed and `git tag hypotheses-locked-YYYYMMDD` is pushed *before* salon enumeration begins. The Stage 3 notebook fails closed if the tag is missing.

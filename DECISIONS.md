@@ -48,6 +48,8 @@ When a decision is later revised, add a *new* entry that supersedes the old; do 
 **Date:** 2026-04-28
 **Reason:** Anchored to DfE statutory walking-distance limits (2 mi for under-8s, 3 mi for over-8s) and median actual home–school distances in England (~1.1 km primary, ~3.4 km secondary). Special schools have much wider catchments by design. The ±25 % sensitivity tests robustness to these caps.
 
+**SUPERSEDED by DEC-016**: 10 km is unrealistic for a *walking* analysis. The cap is the maximum network distance a route is allowed to traverse before we say "this LSOA cannot reach this school on foot"; for special-school pupils above a 5 km walk it is mechanistically a non-walking journey. Cap is now 5 km for all phases.
+
 ## DEC-011 — k-NN (k=3) inverse-distance-weighted as sensitivity; no Huff/gravity
 **Date:** 2026-04-28
 **Reason:** k=3 IDW is the right sensitivity to bound allocation-choice impact on the headline RII ratio. Huff/gravity models import parameters that cannot be calibrated without admissions data, which we do not have, and would invite reviewer challenge for no analytic gain.
@@ -65,6 +67,10 @@ When a decision is later revised, add a *new* entry that supersedes the old; do 
 ## DEC-014 — Do not republish raw Google Places records
 **Date:** 2026-04-28
 **Reason:** Google Places ToS prohibits redistribution of raw place records. The OSM-only replication path is fully sufficient for independent verification by reviewers; aggregated salon counts and grid summaries are publishable.
+
+## DEC-016 — Cap walking catchment at 5 km for all school phases (supersedes DEC-010 special cap)
+**Date:** 2026-04-28
+**Reason:** A 10 km network distance for special schools (DEC-010) is incompatible with a *walking-route* exposure framing — pupils above ~5 km walk are not walking, they are bussed, taxied, or driven. Including them inflates the per-pupil route length and dilutes the urban deprivation signal we are trying to measure. The cap is now uniformly 5 km. The ±25 % sensitivity (Sensitivity #5 in HYPOTHESES.md) becomes a 4 km / 6 km test.
 
 ## DEC-015 — Add OA21 origin-geometry sensitivity (HYPOTHESES.md amendment A-01)
 **Date:** 2026-04-28

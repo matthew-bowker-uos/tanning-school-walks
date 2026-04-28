@@ -13,6 +13,8 @@ data/processed/
 # Audit logs (timestamped run artefacts; only the directory is tracked)
 audit_logs/*
 !audit_logs/.gitkeep
+# manual_verification.csv is human-edited and must be durable
+!audit_logs/manual_verification.csv
 
 # Outputs are committed selectively (final tables/figures only)
 outputs/**/*.tmp.*
@@ -27,6 +29,7 @@ build/
 dist/
 .venv/
 venv/
+cache/
 .python-version-local
 
 # uv / pip
