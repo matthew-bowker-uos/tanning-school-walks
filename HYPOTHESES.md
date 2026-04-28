@@ -7,6 +7,12 @@ The trade-off versus full OSF pre-registration is acknowledged in DEC-013 and wi
 **Authored:** 2026-04-28
 **Author:** Matthew Bowker
 
+## Amendment log
+
+Changes after the hypothesis-lock tag was set are listed here so the historical record is transparent. **Hypotheses H1/H2/H3 and the primary outcome are not changed by any amendment.** Amendments only refine the pre-specified sensitivity-analysis list, and only ever before salon data collection.
+
+- **A-01 (2026-04-28)**: Added Sensitivity #9 (OA21 origin geometry). Reason: a methodological-granularity check requested before Stage 3 began; described in DEC-015. The amendment was made before any salon data was collected.
+
 ---
 
 ## Setting
@@ -50,8 +56,9 @@ The sensitivity dimensions listed below are the ones whose results will be repor
 6. Route-buffer width: 50 m vs 100 m.
 7. Restrict to schools with ≥1 salon in any buffer.
 8. Routing engine: pandana vs osmnx (and OS Open Roads + networkx if used) on a 10–15 % random sample.
+9. **(Added by amendment A-01.)** Origin geometry granularity: rerun the route-based exposure with **OA21 population-weighted centroids** as the origin (≈ 6× finer than LSOA21), keeping the LSOA-level deprivation join via the ONS OA21→LSOA21 lookup. Tests robustness of the headline RII to within-LSOA averaging.
 
-The headline `RII_route / RII_buffer` will be reported as a forest plot across all eight sensitivity dimensions.
+The headline `RII_route / RII_buffer` will be reported as a forest plot across all nine sensitivity dimensions.
 
 ## Anything not pre-specified here
 

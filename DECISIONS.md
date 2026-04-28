@@ -65,3 +65,7 @@ When a decision is later revised, add a *new* entry that supersedes the old; do 
 ## DEC-014 — Do not republish raw Google Places records
 **Date:** 2026-04-28
 **Reason:** Google Places ToS prohibits redistribution of raw place records. The OSM-only replication path is fully sufficient for independent verification by reviewers; aggregated salon counts and grid summaries are publishable.
+
+## DEC-015 — Add OA21 origin-geometry sensitivity (HYPOTHESES.md amendment A-01)
+**Date:** 2026-04-28
+**Reason:** Real-data check on Stage 2 outputs showed urban LSOAs in NE have a median equivalent radius of 360 m (smaller than the 400 m exposure buffer), and rural LSOAs are larger but contribute little exposure. LSOA-level origin geometry is therefore appropriate as the primary unit. To pre-empt a reviewer concern about within-LSOA averaging masking variation, an OA21-level origin sensitivity is added: rerun route exposure with the ~10,000 OA21 PWCs in NE (≈ 6× finer than LSOA21), keeping IMD/IDACI joined at LSOA21 level via the ONS OA21→LSOA21 lookup. Pre-data amendment (no salon collection done yet); recorded in HYPOTHESES.md amendment log A-01 for transparency.
