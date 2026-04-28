@@ -77,6 +77,21 @@ def _nearest_node_indices(
     return network.get_node_ids(points_x, points_y).values
 
 
+def _snap_to_network(
+    network, gdf: gpd.GeoDataFrame, lon_col: str = "lon_wgs", lat_col: str = "lat_wgs"
+) -> gpd.GeoDataFrame:
+    """Add WGS84 lon/lat + snapped pandana node id to ``gdf`` (BNG-input)."""
+
+    out = gdf.copy()
+    wgs = out.to_crs("EPSG:4326")
+    out[lon_col] = wgs.geometry.x.to_numpy()
+    out[lat_col] = wgs.geometry.y.to_numpy()
+    out["pandana_node"] = _nearest_node_indices(
+        network, out[lon_col].to_numpy(), out[lat_col].to_numpy()
+    )
+    return out
+
+
 def assign_nearest_school(
     network,
     pwc_gdf: gpd.GeoDataFrame,
@@ -90,8 +105,14 @@ def assign_nearest_school(
 ) -> CatchmentResult:
     """Hard nearest-school per phase, capped by phase walking distance.
 
-    ``network`` is a :class:`pandana.Network`. ``set_pois`` is called
-    internally per phase, so no explicit ``precompute`` is required.
+    Pre-snaps both PWCs and schools to pandana network nodes (via the
+    public ``get_node_ids`` KDTree) and computes all-pairs shortest path
+    lengths per phase via ``shortest_path_lengths`` in batch. The
+    snapped ``origin_node`` and ``dest_node`` are recorded on the
+    assignment so Stage 5 can construct a route between exactly the same
+    OD pair without re-snapping (avoids the pandana nearest_pois
+    inconsistency where its internal POI snap differs from
+    ``get_node_ids``).
 
     Both inputs must be in EPSG:27700.
     """
@@ -105,85 +126,54 @@ def assign_nearest_school(
     if cap_overrides:
         caps.update(cap_overrides)
 
-    schools = schools_gdf.copy()
+    schools = _snap_to_network(network, schools_gdf)
     schools["phase_cat_internal"] = _phase_categories(schools, phase_col)
-    # We need lon/lat for pandana — pandana stores nodes in WGS84.
-    schools_wgs = schools.to_crs("EPSG:4326")
-    schools["lon_wgs"] = schools_wgs.geometry.x
-    schools["lat_wgs"] = schools_wgs.geometry.y
-
-    pwc = pwc_gdf.copy()
-    pwc_wgs = pwc.to_crs("EPSG:4326")
-    pwc["lon_wgs"] = pwc_wgs.geometry.x
-    pwc["lat_wgs"] = pwc_wgs.geometry.y
-
-    # Snap each PWC to the nearest network node up front.
-    pwc["pandana_node"] = _nearest_node_indices(
-        network, pwc["lon_wgs"].to_numpy(), pwc["lat_wgs"].to_numpy()
-    )
+    pwc = _snap_to_network(network, pwc_gdf)
 
     rows: list[dict[str, object]] = []
     audit: dict[str, int | float] = {"n_lsoa": int(len(pwc))}
 
     for cat, cap_m in caps.items():
-        sub = schools.loc[schools["phase_cat_internal"] == cat]
+        sub = schools.loc[schools["phase_cat_internal"] == cat].reset_index(drop=True)
         if sub.empty:
             audit[f"n_schools_{cat}"] = 0
             audit[f"n_assigned_{cat}"] = 0
             continue
-        # Register schools as POIs for this phase.
-        network.set_pois(
-            category=f"schools_{cat}",
-            maxdist=cap_m,
-            maxitems=1,
-            x_col=sub["lon_wgs"].to_numpy(),
-            y_col=sub["lat_wgs"].to_numpy(),
-        )
-        nearest = network.nearest_pois(
-            distance=cap_m,
-            category=f"schools_{cat}",
-            num_pois=1,
-            include_poi_ids=True,
-        )
-        # `nearest` is indexed by network node id with columns
-        # 1 (distance) and 'poi1' (poi index, 1-based-ish per pandana).
-        dist_col = 1 if 1 in nearest.columns else nearest.columns[0]
-        poi_col = "poi1" if "poi1" in nearest.columns else nearest.columns[-1]
 
-        # Map PWC -> its nearest node -> distance + poi index for THIS phase.
-        per_lsoa = pwc.merge(
-            nearest[[dist_col, poi_col]].rename(columns={dist_col: "distance_m", poi_col: "poi_idx"}),
-            left_on="pandana_node",
-            right_index=True,
-            how="left",
-        )
-        # POI index is 1-based into ``sub`` row order.
-        sub_indexed = sub.reset_index(drop=True)
-        valid = (
-            per_lsoa["distance_m"].notna()
-            & per_lsoa["poi_idx"].notna()
-            & (per_lsoa["distance_m"] <= cap_m)
-        )
-        for _, r in per_lsoa.loc[valid].iterrows():
-            poi_i = int(r["poi_idx"]) - 1
-            if poi_i < 0 or poi_i >= len(sub_indexed):
+        n_l, n_s = len(pwc), len(sub)
+        origins = np.repeat(pwc["pandana_node"].to_numpy(), n_s)
+        dests = np.tile(sub["pandana_node"].to_numpy(), n_l)
+        lengths = np.asarray(
+            network.shortest_path_lengths(origins.astype("int64"), dests.astype("int64"))
+        ).reshape(n_l, n_s).astype("float64")
+
+        # Disconnected pairs come back as a near-uint-max wrap value;
+        # mask them as unreachable.
+        lengths[lengths > cap_m] = np.inf
+        argmin_idx = lengths.argmin(axis=1)
+        min_dist = lengths[np.arange(n_l), argmin_idx]
+
+        for li in range(n_l):
+            d = min_dist[li]
+            if not np.isfinite(d):
                 continue
-            urn_val = sub_indexed.iloc[poi_i][school_id_col]
-            phase_val = sub_indexed.iloc[poi_i][phase_col]
-            child_n = r.get(pwc_pop_col)
+            si = int(argmin_idx[li])
             rows.append(
                 {
-                    pwc_id_col: r[pwc_id_col],
-                    school_id_col: urn_val,
-                    "phase": phase_val,
+                    pwc_id_col: pwc.iloc[li][pwc_id_col],
+                    school_id_col: sub.iloc[si][school_id_col],
+                    "phase": sub.iloc[si][phase_col],
                     "phase_cat": cat,
-                    "distance_m": float(r["distance_m"]),
+                    "distance_m": float(d),
                     "weight": 1.0,
-                    pwc_pop_col: child_n,
+                    pwc_pop_col: pwc.iloc[li].get(pwc_pop_col),
+                    "origin_node": int(pwc.iloc[li]["pandana_node"]),
+                    "dest_node": int(sub.iloc[si]["pandana_node"]),
                 }
             )
-        audit[f"n_schools_{cat}"] = int(len(sub))
-        audit[f"n_assigned_{cat}"] = int(valid.sum())
+
+        audit[f"n_schools_{cat}"] = int(n_s)
+        audit[f"n_assigned_{cat}"] = int(np.isfinite(min_dist).sum())
 
     df = pd.DataFrame(rows)
     audit["n_assignments"] = len(df)
@@ -219,19 +209,9 @@ def assign_knn_idw(
     if cap_overrides:
         caps.update(cap_overrides)
 
-    schools = schools_gdf.copy()
+    schools = _snap_to_network(network, schools_gdf)
     schools["phase_cat_internal"] = _phase_categories(schools, phase_col)
-    schools_wgs = schools.to_crs("EPSG:4326")
-    schools["lon_wgs"] = schools_wgs.geometry.x
-    schools["lat_wgs"] = schools_wgs.geometry.y
-
-    pwc = pwc_gdf.copy()
-    pwc_wgs = pwc.to_crs("EPSG:4326")
-    pwc["lon_wgs"] = pwc_wgs.geometry.x
-    pwc["lat_wgs"] = pwc_wgs.geometry.y
-    pwc["pandana_node"] = _nearest_node_indices(
-        network, pwc["lon_wgs"].to_numpy(), pwc["lat_wgs"].to_numpy()
-    )
+    pwc = _snap_to_network(network, pwc_gdf)
 
     rows: list[dict[str, object]] = []
 
@@ -239,54 +219,40 @@ def assign_knn_idw(
         sub = schools.loc[schools["phase_cat_internal"] == cat].reset_index(drop=True)
         if sub.empty:
             continue
-        network.set_pois(
-            category=f"schools_{cat}_knn",
-            maxdist=cap_m,
-            maxitems=k,
-            x_col=sub["lon_wgs"].to_numpy(),
-            y_col=sub["lat_wgs"].to_numpy(),
-        )
-        nearest = network.nearest_pois(
-            distance=cap_m,
-            category=f"schools_{cat}_knn",
-            num_pois=k,
-            include_poi_ids=True,
-        )
 
-        # Vectorise: merge PWC rows against the nearest table on pandana_node,
-        # then iterate the small per-LSOA result frame instead of itertuples.
-        joined = pwc.merge(nearest, left_on="pandana_node", right_index=True, how="inner")
-        for _, lsoa_row in joined.iterrows():
-            dists: list[float] = []
-            urns: list[object] = []
-            phases: list[object] = []
-            for i in range(1, k + 1):
-                d = lsoa_row.get(i)
-                if d is None or pd.isna(d) or d > cap_m:
-                    continue
-                poi_idx = lsoa_row.get(f"poi{i}")
-                if pd.isna(poi_idx):
-                    continue
-                pi = int(poi_idx) - 1
-                if pi < 0 or pi >= len(sub):
-                    continue
-                dists.append(float(d))
-                urns.append(sub.iloc[pi][school_id_col])
-                phases.append(sub.iloc[pi][phase_col])
-            if not dists:
+        n_l, n_s = len(pwc), len(sub)
+        origins = np.repeat(pwc["pandana_node"].to_numpy(), n_s)
+        dests = np.tile(sub["pandana_node"].to_numpy(), n_l)
+        lengths = np.asarray(
+            network.shortest_path_lengths(origins.astype("int64"), dests.astype("int64"))
+        ).reshape(n_l, n_s).astype("float64")
+        lengths[lengths > cap_m] = np.inf
+
+        # For each LSOA pick the k smallest finite distances.
+        for li in range(n_l):
+            row = lengths[li]
+            finite = np.isfinite(row)
+            if not finite.any():
                 continue
-            inv = np.array([1.0 / max(d, 1.0) for d in dists])
+            cand_idx = np.where(finite)[0]
+            cand_d = row[cand_idx]
+            order = np.argsort(cand_d)[:k]
+            chosen_idx = cand_idx[order]
+            chosen_d = cand_d[order]
+            inv = 1.0 / np.maximum(chosen_d, 1.0)
             inv = inv / inv.sum()
-            for d, u, ph, w in zip(dists, urns, phases, inv):
+            for si, d, w in zip(chosen_idx, chosen_d, inv):
                 rows.append(
                     {
-                        pwc_id_col: lsoa_row[pwc_id_col],
-                        school_id_col: u,
-                        "phase": ph,
+                        pwc_id_col: pwc.iloc[li][pwc_id_col],
+                        school_id_col: sub.iloc[si][school_id_col],
+                        "phase": sub.iloc[si][phase_col],
                         "phase_cat": cat,
-                        "distance_m": d,
+                        "distance_m": float(d),
                         "weight": float(w),
-                        pwc_pop_col: lsoa_row.get(pwc_pop_col),
+                        pwc_pop_col: pwc.iloc[li].get(pwc_pop_col),
+                        "origin_node": int(pwc.iloc[li]["pandana_node"]),
+                        "dest_node": int(sub.iloc[si]["pandana_node"]),
                     }
                 )
 
