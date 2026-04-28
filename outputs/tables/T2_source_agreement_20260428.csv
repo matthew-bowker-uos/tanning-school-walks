@@ -1,0 +1,14 @@
+lad_code,lad_name,n_google,n_osm,n_matched,jaccard
+E06000047,County Durham,156,18,9,0.055
+E06000005,Darlington,25,6,2,0.069
+E08000037,Gateshead,48,3,3,0.062
+E06000001,Hartlepool,16,5,2,0.105
+E06000002,Middlesbrough,41,2,1,0.024
+E08000021,Newcastle upon Tyne,57,7,4,0.067
+E08000022,North Tyneside,45,15,6,0.111
+E06000057,Northumberland,99,6,2,0.019
+E06000003,Redcar and Cleveland,16,1,1,0.062
+E08000023,South Tyneside,29,3,2,0.067
+E06000004,Stockton-on-Tees,46,5,2,0.041
+E08000024,Sunderland,75,5,2,0.026
+,NE total,653,76,36,0.052
