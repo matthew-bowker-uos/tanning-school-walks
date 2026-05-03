@@ -113,3 +113,16 @@ Resolution: extended each truncated bbox to fully enclose its LAD polygons (with
 **Reason:** NE salon enumeration was manually classified in `audit_logs/manual_verification.csv` (730 rows, 100% of Google Places hits in NE) to flag false-positives like beauty salons, spray-tan-only businesses, etc. For methodological parity, the 5 cross-regional fetches (~3,560 salons total) need a comparable verification step. Full classification (3,560 rows) is impractical for one researcher; instead, a **stratified random sample** (~100/region, stratified by LAD × IMD-quintile, total n=616) is generated at `audit_logs/google_classification_sample_other_regions_<DATE>.csv`. This gives per-region, per-quintile false-positive rate estimates, which are then applied as adjustment factors to the regional salon counts in a sensitivity analysis. The schema mirrors `google_classification_sample_<DATE>.csv` (the simpler `is_true_salon` Y/N format) rather than the richer NE schema.
 
 **How to apply:** Once classified, the false-positive rate per region × IMD-quintile is computed and applied either as an exclusion (drop rejected place_ids from the verified set) or as a per-cell precision factor on counts. The sensitivity is reported in the manuscript supplement; primary results use the unadjusted counts to keep them comparable to the published Lorigan finding (which also used unverified Google data).
+
+**SUPERSEDED by DEC-021** on the question of sample size: full classification was completed (3,608 rows, 100% coverage), making the per-cell precision adjustment the primary analysis rather than a sensitivity.
+
+## DEC-021 — Full verification completed; verified (True-only) analysis becomes primary; unadjusted becomes sensitivity
+**Date:** 2026-05-03
+**Reason:** DEC-020 anticipated a stratified sample for adjustment factors. In practice the researcher classified all 3,608 cross-regional records (100% coverage). Combined with the pre-existing NE full classification (730/730 records), every salon in the study has a confirmed True/False label. This changes the analytic hierarchy:
+
+1. **Primary analysis:** route-RII and density computed from verified True salons only (false positives excluded by place_id). This is the cleanest estimate and removes the need for any multiplicative precision correction.
+2. **Sensitivity:** unadjusted (all Google hits) reported alongside for comparability with Lorigan et al. (2025), which used unverified Google data.
+
+**Key finding from verification:** False-positive rates vary systematically by IMD quintile. In Yorkshire (Q1=40% FP vs Q5=78% FP) and West Midlands (Q1=33% FP vs Q5=61% FP), the unadjusted counts substantially over-represent salons in the least-deprived quintile. This means the unadjusted Q1/Q5 density ratios and route-RII values are *underestimates* of the true deprivation gradient in those regions. After verification, the apparent WM density inversion (raw Q1/Q5=0.71) is expected to resolve toward parity or positive gradient.
+
+**How to apply:** T14_verified / T15_verified / T13_verified are the primary results tables. T14 / T15 / T13 (unverified) are retained for the Lorigan-comparability sensitivity. DECISIONS.md and the manuscript methods section must clearly state that the primary analysis excludes verified false positives.
