@@ -96,14 +96,14 @@ BUFFER_DISTANCES_SENSITIVITY_M: tuple[int, ...] = (250, 400, 800, 1600)
 ROUTE_BUFFER_PRIMARY_M: int = 50
 ROUTE_BUFFER_SENSITIVITY_M: int = 100
 
-# Catchment distance caps by phase (DEC-010, superseded by DEC-016).
-# Walking-distance is capped at 5 km for every phase: anything longer
-# would not realistically be walked and would inflate route lengths in
-# rural Northumberland with little additional exposure signal.
+# Catchment distance caps by phase (DEC-010 → DEC-016 → DEC-017).
+# Empirical walking caps from DfT National Travel Survey 2024:
+# modal-walking thresholds are 1.6 km primary, 3.2 km secondary.
+# Special schools treated as secondary (no NTS-specific estimate).
 CATCHMENT_CAP_M: dict[str, int] = {
-    "primary": 2000,
-    "secondary": 5000,
-    "special": 5000,
+    "primary": 1600,
+    "secondary": 3200,
+    "special": 3200,
 }
 
 # k-NN parameter for the IDW catchment sensitivity (DEC-011).

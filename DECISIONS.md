@@ -77,7 +77,7 @@ When a decision is later revised, add a *new* entry that supersedes the old; do 
    - Primary (5-10): pop_5_9 + 0.2 × pop_10_14
    - Secondary (11-16): 0.8 × pop_10_14 + 0.4 × pop_15_19
    These linear-interpolation cohort estimates assume uniform distribution within 5-year bands (the only public Census granularity for OAs).
-3. **Empirical walking caps** from DfT NTS 2024: 1.6 km primary, 3.2 km secondary. Modal-walking thresholds.
+3. **Empirical walking caps** from DfT NTS 2024: 1.6 km primary, 3.2 km secondary. Modal-walking thresholds. `config.CATCHMENT_CAP_M` updated 2026-05-03 to match (was 2000/5000 per DEC-016; superseded here).
 4. **Phase-stratified RIIs** so primary and secondary children's exposures are not pooled. The pooled regression controls for phase as a factor.
 5. **Routes with zero relevant cohort dropped** (no primary-aged kids at OA X means no primary route from there).
 
