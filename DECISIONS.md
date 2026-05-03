@@ -68,6 +68,24 @@ When a decision is later revised, add a *new* entry that supersedes the old; do 
 **Date:** 2026-04-28
 **Reason:** Google Places ToS prohibits redistribution of raw place records. The OSM-only replication path is fully sufficient for independent verification by reviewers; aggregated salon counts and grid summaries are publishable.
 
+## DEC-017 — Most-rigorous-on-public-data analysis: origin-IMD + age-cohort-weighted + empirical walking caps + phase-stratified
+**Date:** 2026-04-28
+**Reason:** The earliest LSOA-primary numbers attributed route exposure to the SCHOOL'S LSOA-IMD and weighted every route by the OA's total 5-19 population, conflating cohorts. The methodologically rigorous version on data we can access without DfE Schools-Census micro-data:
+
+1. **Origin-IMD attribution.** A route's salon count is a property of where the pupil lives, not where the school sits. Each route is attributed by its origin OA's IMD (inherited from origin's LSOA).
+2. **Age-cohort weighting.** Each (origin × school) route is weighted only by the OA's children whose age matches the school's phase:
+   - Primary (5-10): pop_5_9 + 0.2 × pop_10_14
+   - Secondary (11-16): 0.8 × pop_10_14 + 0.4 × pop_15_19
+   These linear-interpolation cohort estimates assume uniform distribution within 5-year bands (the only public Census granularity for OAs).
+3. **Empirical walking caps** from DfT NTS 2024: 1.6 km primary, 3.2 km secondary. Modal-walking thresholds.
+4. **Phase-stratified RIIs** so primary and secondary children's exposures are not pooled. The pooled regression controls for phase as a factor.
+5. **Routes with zero relevant cohort dropped** (no primary-aged kids at OA X means no primary route from there).
+
+**Limitations made explicit in manuscript:**
+- Nearest-school assumption: ~70% of primary, ~50% secondary actually attend their nearest school. The 30-50% who travel further are disproportionately wealthier (faith / grammar / academy choice). Bias is toward under-counting longer commutes by less-deprived pupils.
+- Mode-share not modelled: NTS shows walking is similar across IMD for short trips (<1 mile), so this does not bias the relative inequality much; but absolute level is conditional on walking.
+- Pupil-school real pairings not available without DfE Schools Census DPA registration. The nearest-school within walking distance is the published-GIS convention (Burgoine et al., Nahar et al.).
+
 ## DEC-016 — Cap walking catchment at 5 km for all school phases (supersedes DEC-010 special cap)
 **Date:** 2026-04-28
 **Reason:** A 10 km network distance for special schools (DEC-010) is incompatible with a *walking-route* exposure framing — pupils above ~5 km walk are not walking, they are bussed, taxied, or driven. Including them inflates the per-pupil route length and dilutes the urban deprivation signal we are trying to measure. The cap is now uniformly 5 km. The ±25 % sensitivity (Sensitivity #5 in HYPOTHESES.md) becomes a 4 km / 6 km test.
