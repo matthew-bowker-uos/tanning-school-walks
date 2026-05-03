@@ -1,0 +1,3 @@
+attribution,rii_buffer,rii_route,ratio,ratio_ci_low,ratio_ci_high,n,note
+school_IMD,1.864943114440831,1.058311763284233,0.5674766994710979,,,1098,buffer + route both attributed by school's LSOA IMD
+origin_IMD,1.864943114440831,1.455275606456239,0.7803324375888949,1.0259494669953269,1.8690968746092746,21243,"route per-route, IMD = origin OA's LSOA-IMD; buffer still by school"
