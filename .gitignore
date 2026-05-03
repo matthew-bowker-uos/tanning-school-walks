@@ -15,6 +15,8 @@ audit_logs/*
 !audit_logs/.gitkeep
 # manual_verification.csv is human-edited and must be durable
 !audit_logs/manual_verification.csv
+# Cross-regional verification samples (generated for human classification)
+!audit_logs/google_classification_sample_other_regions_*.csv
 
 # Outputs are committed selectively (final tables/figures only)
 outputs/**/*.tmp.*
