@@ -1,0 +1,11 @@
+region,phase,n_pupils_total,n_pupils_exposed,pct_exposed,n_schools_total,n_schools_with_salon_route
+NE_England,primary,192238,17749,9.2,750,114
+NE_England,secondary,137513,25769,18.7,136,88
+SW_England,primary,220364,12214,5.5,909,91
+SW_England,secondary,177155,23272,13.1,174,79
+Greater_Manchester,primary,227486,13533,5.9,763,96
+Greater_Manchester,secondary,161731,26580,16.4,160,102
+West_Midlands,primary,219301,9269,4.2,631,56
+West_Midlands,secondary,173816,17080,9.8,166,74
+Yorkshire,primary,292926,18743,6.4,995,137
+Yorkshire,secondary,209966,34800,16.6,186,115
